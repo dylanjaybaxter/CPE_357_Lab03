@@ -8,6 +8,7 @@ reads in a file, builds a huffman tree and ouputs a list of the encoded values
 #include<stdio.h>
 #include<unistd.h>
 #include<ctype.h>
+#include<math.h>
 #include<getopt.h>
 #include"huffman.h"
 
@@ -33,13 +34,19 @@ int main(int argc, char* const argv[]){
     unsigned int i;
     int j;
     unsigned int code;
+    char buff[16] = "";
     for(i=0;i<256;i++){
+        code = codeInd->codes[i];
         if(codeInd->lens[i] != 0 ){
-            printf("0x%02x:  ",i);
-            code = codeInd->codes[i];
+            /* Fill Buffer with bits in correct order*/
             for(j=0;j<codeInd->lens[i];j++){
-                printf("%d", code%2);
-                code = code >> 1;
+                buff[codeInd->lens[i]-j-1] = ((code%2)+48);
+                code = code>>1;
+            }
+            /*Print bits*/
+            printf("0x%02x:  ", i);
+            for(j=0;j<codeInd->lens[i];j++){
+                printf("%c", buff[j]);
             }
             printf("\n");
         }

@@ -184,7 +184,6 @@ Node_List* createNodeList(int* freqs){
 huff_Node* createHTree(int* freqs){
     /*Initialize node list(add non-zero characters)*/
     Node_List* list = createNodeList(freqs);
-    huff_Node* node = NULL;
     huff_Node* node1 = NULL;
     huff_Node* node2 = NULL;
     huff_Node* sumNode = NULL;
@@ -192,23 +191,9 @@ huff_Node* createHTree(int* freqs){
 
     /*Until 1 node remains,*/
     while(list->head != list->tail){
-        node = list->tail;
-        while(1){
-            if(node == NULL){
-                break;
-            }
-            printf("(%d) ",node->c);
-            node = node->next;
-        }
-        printf("\n");
-
         /*Pop 2 nodes*/
         node1 = popMin(list);
         node2 = popMin(list);
-
-        if(node1->c == 98){
-            printf("hello");
-        }
 
         /*Attach both to sum node */
         sum = (node1->freq)+(node2->freq);
@@ -230,12 +215,8 @@ void genCodesRecur(huff_Node* tree, codeIndex* index, int code, int len){
     if((tree->left == NULL)&&(tree->left == NULL)){
         index->codes[tree->c] = code;
         index->lens[tree->c] = len;
-        printf("%x: %d\n", tree->c, tree->freq);
     }
     else{
-        if(tree->c != 0){
-            printf("!!!!%x: %d\n", tree->c, tree->freq);
-        }
         /*Traverse Right*/
         genCodesRecur(tree->right, index, (code*2)+1, len+1);
         /*Traverse Left*/
