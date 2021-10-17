@@ -213,6 +213,9 @@ huff_Node* createHTree(int* freqs){
 void genCodesRecur(huff_Node* tree, codeIndex* index, int code, int len){
     /*If leaf*/
     if((tree->left == NULL)&&(tree->right == NULL)){
+        if(len == 0){
+            len = 1;
+        }
         index->codes[tree->c] = code;
         index->lens[tree->c] = len;
     }
