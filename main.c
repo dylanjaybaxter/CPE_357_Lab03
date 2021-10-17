@@ -44,7 +44,7 @@ int main(int argc, char* const argv[]){
                 code = code>>1;
             }
             /*Print bits*/
-            printf("0x%02x:  ", i);
+            printf("0x%02x: ", i);
             for(j=0;j<codeInd->lens[i];j++){
                 printf("%c", buff[j]);
             }
