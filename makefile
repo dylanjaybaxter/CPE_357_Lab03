@@ -25,6 +25,10 @@ testwap: htable
 	./htable WAP.txt > WAPO.txt
 	~pn-cs357/demos/htable WAP.txt > WAPI.txt
 	diff -s WAPO.txt WAPI.txt
+testone: htable
+	./htable oc > ocOut.txt
+	~pn-cs357/demos/htable oc > ocSol.txt
+	diff -s ocOut.txt ocSol.txt
 debug: htable
 	gdb htable
 valgrind: htable
