@@ -77,7 +77,7 @@ void insertNode(Node_List* list, huff_Node* node){
         while(1){
             /*If current node is greater than node
             Insert at the back of current node*/
-            if(compareNodes(currNode, node) > 0){
+            if(compareNodes(currNode, node) >= 0){
                 /*If not 1st item*/
                 if(currNode->prev != NULL){
                     /*link previous node to inserted*/
@@ -101,6 +101,7 @@ void insertNode(Node_List* list, huff_Node* node){
                 /*If node is greater than current, move to next*/
                 if(currNode->next == NULL){
                     currNode->next = node;
+                    node->prev = currNode;
                     list->head = node;
                     list->items = list->items + 1;
                     break;
@@ -108,7 +109,10 @@ void insertNode(Node_List* list, huff_Node* node){
                 currNode = (huff_Node*)currNode->next;
             }
             else{
-                /*if equal, do nothing*/
+                /*if equal*/
+                /*link inserted behind current node*/
+
+
                 break;
             }
         }
@@ -180,16 +184,31 @@ Node_List* createNodeList(int* freqs){
 huff_Node* createHTree(int* freqs){
     /*Initialize node list(add non-zero characters)*/
     Node_List* list = createNodeList(freqs);
+    huff_Node* node = NULL;
     huff_Node* node1 = NULL;
     huff_Node* node2 = NULL;
     huff_Node* sumNode = NULL;
     int sum = 0;
 
     /*Until 1 node remains,*/
-    while(list->items > 1){
+    while(list->head != list->tail){
+        node = list->tail;
+        while(1){
+            if(node == NULL){
+                break;
+            }
+            printf("(%d) ",node->c);
+            node = node->next;
+        }
+        printf("\n");
+
         /*Pop 2 nodes*/
         node1 = popMin(list);
         node2 = popMin(list);
+
+        if(node1->c == 98){
+            printf("hello");
+        }
 
         /*Attach both to sum node */
         sum = (node1->freq)+(node2->freq);
@@ -211,8 +230,12 @@ void genCodesRecur(huff_Node* tree, codeIndex* index, int code, int len){
     if((tree->left == NULL)&&(tree->left == NULL)){
         index->codes[tree->c] = code;
         index->lens[tree->c] = len;
+        printf("%x: %d\n", tree->c, tree->freq);
     }
     else{
+        if(tree->c != 0){
+            printf("!!!!%x: %d\n", tree->c, tree->freq);
+        }
         /*Traverse Right*/
         genCodesRecur(tree->right, index, (code*2)+1, len+1);
         /*Traverse Left*/
@@ -254,6 +277,7 @@ huff_Node* popMin(Node_List* list){
     if(list->tail != NULL){
         huff_Node* minim = list->tail;
         if(minim->next != NULL){
+            minim->next->prev = NULL;
             list->tail = minim->next;
         }
         else{
