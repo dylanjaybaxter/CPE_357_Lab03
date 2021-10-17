@@ -248,8 +248,10 @@ void freeIndex(codeIndex* index){
 codeIndex* genCodes(huff_Node* tree){
     /*Initialize code  and bit count*/
     codeIndex* index = init_CodeIndex();
-    /*Recursively Transverse Tree*/
-    genCodesRecur(tree, index, 0, 0);
+    if(tree != NULL){
+        /*Recursively Transverse Tree*/
+        genCodesRecur(tree, index, 0, 0);
+    }
     return index;
 }
 
@@ -274,11 +276,13 @@ huff_Node* popMin(Node_List* list){
 }
 
 void freeTree(huff_Node* tree){
-    if((tree->right != NULL) && (tree->left !=NULL)){
-        huff_Node* right = tree->right;
-        huff_Node* left = tree->left;
-        freeTree(left);
-        freeTree(right);
+    if(tree != NULL){
+        if((tree->right != NULL) && (tree->left !=NULL)){
+            huff_Node* right = tree->right;
+            huff_Node* left = tree->left;
+            freeTree(left);
+            freeTree(right);
+        }
+        free(tree);
     }
-    free(tree);
 }
