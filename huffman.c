@@ -215,6 +215,7 @@ void genCodesRecur(huff_Node* tree, codeIndex* index, int code, int len){
     if((tree->left == NULL)&&(tree->right == NULL)){
         if(len == 0){
             len = 1;
+            code = -1;
         }
         index->codes[tree->c] = code;
         index->lens[tree->c] = len;
