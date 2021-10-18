@@ -35,37 +35,43 @@ typedef struct{
     int* lens;
 }codeIndex;
 
-/*Compares 2 nodes frequencies: outputs 1 if 1>2, -1 if 1<2 and 0 if equal*/
-int compareNodes(huff_Node* node1, huff_Node* node2);
-
+/*-------------------Initializers-------------------*/
 Node_List* init_Node_List();
-
-void freeList(Node_List* list);
 
 huff_Node* init_Huff_Node(int freq, int c);
 
-void insertNode(Node_List* list, huff_Node* node);
-
-huff_Node* popTail(Node_List* list);
-
-/*Counts Frequency of characters from 0 to 255*/
-int* countFreq(char *filename);
-
-/*Creates a huffman tree frm list of freqs*/
-Node_List* createNodeList(int* freqs);
-
-/*Creates huffman codes from tree*/
-huff_Node* createHTree(int* freqs);
-
-void genCodesRecur(huff_Node* tree, codeIndex* index, int code, int len);
-
 codeIndex* init_CodeIndex();
+
+/*-------------------Deconstructors-------------------*/
+void freeTree(huff_Node* tree);
 
 void freeIndex(codeIndex* index);
 
-codeIndex* genCodes(huff_Node* tree);
+void freeList(Node_List* list);
+
+/*-------------------Ordered Lists------------------*/
+/*Creates a huffman tree frm list of freqs*/
+Node_List* createNodeList(int* freqs);
+
+/*Compares 2 nodes frequencies: outputs 1 if 1>2, -1 if 1<2 and 0 if equal*/
+int compareNodes(huff_Node* node1, huff_Node* node2);
+
+/*Insert node to list in order*/
+void insertNode(Node_List* list, huff_Node* node);
 
 /*Pops the minimum value from the stack as node*/
 huff_Node* popMin(Node_List* list);
 
-void freeTree(huff_Node* tree);
+
+/*-------------------Huffman Functions-------------------*/
+/*Counts Frequency of characters from 0 to 255*/
+int* countFreq(char *filename);
+
+/*Creates huffman codes from tree*/
+huff_Node* createHTree(int* freqs);
+
+/*Generate Codes Recursively from tree*/
+void genCodesRecur(huff_Node* tree, codeIndex* index, int code, int len);
+
+/* Helps internalize Recursion*/
+codeIndex* genCodes(huff_Node* tree);

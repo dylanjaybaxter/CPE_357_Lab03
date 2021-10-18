@@ -9,8 +9,90 @@ huffman encoding
 #include<stdio.h>
 #include"huffman.h"
 
+/*------------------------- Constructors---------------------------*/
+Node_List* init_Node_List(){
+    Node_List* list = (Node_List*)malloc(sizeof(Node_List));
+    list->items = 0;
+    list->head = NULL;
+    list->tail = NULL;
+    return list;
+}
+
+huff_Node* init_Huff_Node(int freq, int c){
+    huff_Node* newNode = (huff_Node*)malloc(sizeof(huff_Node));
+    newNode->freq = freq;
+    newNode->c = c;
+    newNode->prev = NULL;
+    newNode->next = NULL;
+    newNode->right = NULL;
+    newNode->left = NULL;
+    return newNode;
+}
+
+codeIndex* init_CodeIndex(){
+    int* codes = (int*)malloc(256*sizeof(int));
+    int* lens = (int*)malloc(256*sizeof(int));
+    int i;
+    for(i = 0; i<256;i++){
+        codes[i] = 0;
+        lens[i] = 0;
+    }
+    codeIndex* index = (codeIndex*)malloc(sizeof(codeIndex));
+    index->codes = codes;
+    index->lens = lens;
+    return index;
+}
+
+/*------------------------- Deconstructors---------------------------*/
+void freeIndex(codeIndex* index){
+    free(index->codes);
+    free(index->lens);
+    free(index);
+}
+
+void freeList(Node_List* list){
+    /*if((list->head != NULL) && (list->tail != NULL)){
+        while(list->head != list->tail){
+            free(list->tail);
+            list->tail = (huff_Node*)list->tail->next;
+        }
+        free(list->tail);
+    }*/
+    free(list);
+}
+
+void freeTree(huff_Node* tree){
+    /*If tree exisists*/
+    if(tree != NULL){
+        /*Free children recursively*/
+        if((tree->right != NULL) && (tree->left !=NULL)){
+            huff_Node* right = tree->right;
+            huff_Node* left = tree->left;
+            freeTree(left);
+            freeTree(right);
+        }
+        /*Free Self*/
+        free(tree);
+    }
+}
 
 /*------------------------- List Functions---------------------------*/
+Node_List* createNodeList(int* freqs){
+    /*Allocate Struct Array and List*/
+    Node_List* list = init_Node_List();
+    /*Copy over node information*/
+    int i = 0;
+    for(;i<256;i++){
+        /*Insert non zero characters*/
+        if(freqs[i] != 0){
+            huff_Node* newNode = init_Huff_Node(freqs[i], i);
+            insertNode(list, newNode);
+        }
+    }
+    /* Return List */
+    return list;
+}
+
 int compareNodes(huff_Node* node1, huff_Node* node2){
     /* Compare Frequencies*/
     if(node1->freq > node2->freq){
@@ -31,36 +113,6 @@ int compareNodes(huff_Node* node1, huff_Node* node2){
             return 0;
         }
     }
-}
-
-Node_List* init_Node_List(){
-    Node_List* list = (Node_List*)malloc(sizeof(Node_List));
-    list->items = 0;
-    list->head = NULL;
-    list->tail = NULL;
-    return list;
-}
-
-void freeList(Node_List* list){
-    /*if((list->head != NULL) && (list->tail != NULL)){
-        while(list->head != list->tail){
-            free(list->tail);
-            list->tail = (huff_Node*)list->tail->next;
-        }
-        free(list->tail);
-    }*/
-    free(list);
-}
-
-huff_Node* init_Huff_Node(int freq, int c){
-    huff_Node* newNode = (huff_Node*)malloc(sizeof(huff_Node));
-    newNode->freq = freq;
-    newNode->c = c;
-    newNode->prev = NULL;
-    newNode->next = NULL;
-    newNode->right = NULL;
-    newNode->left = NULL;
-    return newNode;
 }
 
 void insertNode(Node_List* list, huff_Node* node){
@@ -118,25 +170,31 @@ void insertNode(Node_List* list, huff_Node* node){
         }
     }
 }
-
-huff_Node* popTail(Node_List* list){
-    /*If list is not empty */
-    if(list->items > 0){
-        /*Set up new tail and temp pointer to return val*/
-        huff_Node* oldTail = list->tail;
-        list->tail = (huff_Node*)list->tail->next;
-        list->tail->prev = NULL;
-
-        /*Decrement item count */
-        list->items--;
-
-        /*Return old tail*/
-        return oldTail;
+/*Pops the minimum value from the stack as node*/
+huff_Node* popMin(Node_List* list){
+    /*If list is not empty*/
+    if(list->tail != NULL){
+        /*Save last*/
+        huff_Node* minim = list->tail;
+        /*If not the only node, remove reference from next node and set tail*/
+        if(minim->next != NULL){
+            minim->next->prev = NULL;
+            list->tail = minim->next;
+        }
+        else{
+            /*Empty List*/
+            list->head = NULL;
+            list->tail = NULL;
+        }
+        /*Decrement Items*/
+        list->items = list->items -1;
+        return minim;
     }
     else{
         return NULL;
     }
 }
+
 
 /*------------------------- Huffman Functions---------------------------*/
 /*Counts Frequency of characters from 0 to 255 and outputs an ordered list*/
@@ -161,23 +219,6 @@ int* countFreq(char *filename){
     }
     fclose(file);
     return freqs;
-}
-
-Node_List* createNodeList(int* freqs){
-    /*Allocate Struct Array and List*/
-    Node_List* list = init_Node_List();
-
-    /*Copy over node information*/
-    int i = 0;
-    for(;i<256;i++){
-        /*Insert non zero characters*/
-        if(freqs[i] != 0){
-            huff_Node* newNode = init_Huff_Node(freqs[i], i);
-            insertNode(list, newNode);
-        }
-    }
-    /* Return List */
-    return list;
 }
 
 /*Creates a huffman tree frm list of freqs*/
@@ -228,26 +269,6 @@ void genCodesRecur(huff_Node* tree, codeIndex* index, int code, int len){
     }
 }
 
-codeIndex* init_CodeIndex(){
-    int* codes = (int*)malloc(256*sizeof(int));
-    int* lens = (int*)malloc(256*sizeof(int));
-    int i;
-    for(i = 0; i<256;i++){
-        codes[i] = 0;
-        lens[i] = 0;
-    }
-    codeIndex* index = (codeIndex*)malloc(sizeof(codeIndex));
-    index->codes = codes;
-    index->lens = lens;
-    return index;
-}
-
-void freeIndex(codeIndex* index){
-    free(index->codes);
-    free(index->lens);
-    free(index);
-}
-
 /*Creates huffman codes from tree*/
 codeIndex* genCodes(huff_Node* tree){
     /*Initialize code  and bit count*/
@@ -257,36 +278,4 @@ codeIndex* genCodes(huff_Node* tree){
         genCodesRecur(tree, index, 0, 0);
     }
     return index;
-}
-
-/*Pops the minimum value from the stack as node*/
-huff_Node* popMin(Node_List* list){
-    if(list->tail != NULL){
-        huff_Node* minim = list->tail;
-        if(minim->next != NULL){
-            minim->next->prev = NULL;
-            list->tail = minim->next;
-        }
-        else{
-            list->head = NULL;
-            list->tail = NULL;
-        }
-        list->items = list->items -1;
-        return minim;
-    }
-    else{
-        return NULL;
-    }
-}
-
-void freeTree(huff_Node* tree){
-    if(tree != NULL){
-        if((tree->right != NULL) && (tree->left !=NULL)){
-            huff_Node* right = tree->right;
-            huff_Node* left = tree->left;
-            freeTree(left);
-            freeTree(right);
-        }
-        free(tree);
-    }
 }
